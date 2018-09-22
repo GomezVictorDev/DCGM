@@ -16,14 +16,15 @@ public class PlayerMovement : MonoBehaviour {
 
 
     }
-	
-	// Update is called once per frame
-	void FixedUpdate () {
+
+    // Update is called once per frame
+    private void Update()
+    {
         if (Input.GetMouseButtonDown(0))
         {
-           if(cameraRay.IsHited )
+            if (cameraRay.IsHited)
             {
-               
+
 
                 switch (cameraRay.LayerHited)
                 {
@@ -38,22 +39,42 @@ public class PlayerMovement : MonoBehaviour {
 
                 }
             }
-          
+
 
 
         }
 
 
 
-        Vector3 target = targetPosition - transform.position;
        
 
-        Debug.Log(target);
-        if (target.sqrMagnitude < 0.3f)
-            target = Vector3.zero;
+    }
+    void FixedUpdate () {
 
-        thirdPersonCharacter.Move(target, false, false);
+        Vector3 target = targetPosition - transform.position;
+        
+        if (target.sqrMagnitude > 0.3f)
+        {
+            thirdPersonCharacter.Move(target, false, false);
+
+        }
+        else
+        {
+            if (target != Vector3.zero)
+            {
+                target = Vector3.zero;
+                thirdPersonCharacter.Move(target, false, false);
+
+            }
+                
+        }
+        
+            
+
+       
        
 		
 	}
+
+
 }

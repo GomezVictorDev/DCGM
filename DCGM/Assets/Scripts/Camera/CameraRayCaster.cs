@@ -61,6 +61,7 @@ public class CameraRayCaster : MonoBehaviour {
         Debug.Log(nameLayerHited);
         nameLayerHited = Enum.GetName(typeof(GameConstants.Layers), GameConstants.Layers.None);
         layerHited = GameConstants.Layers.None;
+
        
 
 
@@ -71,7 +72,7 @@ public class CameraRayCaster : MonoBehaviour {
     {
         int layerMask = 1 << (int)layer;
         Ray ray = viewCam.ScreenPointToRay(Input.mousePosition);
-        isHited = Physics.Raycast(ray,out hit, 100, layerMask);
+        isHited = Physics.Raycast(ray,out hit, 1000, layerMask);
        
 
         if (isHited)
