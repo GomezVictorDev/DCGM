@@ -14,41 +14,49 @@ public class CursorAfforance : MonoBehaviour {
 
     [SerializeField]
     CameraRayCaster cameraRayCaster;
+	[SerializeField] [Range(0,1)]
+	float relativeCursorOffsetX;
+	[SerializeField] [Range(0,1)]
+	float relativeCursorOffsetY;
+
+
 
     void Start () {
+		relativeCursorOffsetX *= enemyCursor.width;
+		relativeCursorOffsetY *= enemyCursor.height;
+		cameraRayCaster.onLayerHitedEvent+=OnLayerHited;
+		cameraRayCaster.onLayerNotHitedEvent +=OnLayerNotHited;
+		
+	}
+	private void OnLayerHited(GameConstants.Layers layer){
+	
+
+
+		switch(layer)
+		{
+
+		case GameConstants.Layers.Enemy:
+			Vector2 hotspotEnemy = new Vector2(enemyCursor.width * relativeCursorOffsetX, enemyCursor.height * relativeCursorOffsetY);
+			Cursor.SetCursor(enemyCursor, hotspotEnemy, CursorMode.Auto);
+			break;
+		case GameConstants.Layers.Walkable:
+			Vector2 hotspotWalk = new Vector2(walkCursor.width * relativeCursorOffsetX, walkCursor.height * relativeCursorOffsetY);
+			Cursor.SetCursor(walkCursor, hotspotWalk, CursorMode.Auto);
+
+			break;
+
+		}
+	}
+	private void OnLayerNotHited(){
+		
+		if(cameraRayCaster.CurrentLayerHited==GameConstants.Layers.None)
+		{
+			Vector2 hotspotUnknow = new Vector2(unknowCursor.width * relativeCursorOffsetX, unknowCursor.height *relativeCursorOffsetY);
+			Cursor.SetCursor(unknowCursor, hotspotUnknow, CursorMode.Auto);
+		}
 		
 	}
 	
 	// Update is called once per frame
-	void Update () {
-        if (cameraRayCaster.IsHited)
-        {
-            switch(cameraRayCaster.LayerHited)
-            {
-               
-                case GameConstants.Layers.Enemy:
-                    Vector2 hotspotEnemy = new Vector2(enemyCursor.width * 0.5f, enemyCursor.height * 0.5f);
-                    Cursor.SetCursor(enemyCursor, hotspotEnemy, CursorMode.ForceSoftware);
-                    break;
-                case GameConstants.Layers.Walkable:
-                    Vector2 hotspotWalk = new Vector2(walkCursor.width * 0.5f, walkCursor.height * 0.5f);
-                    Cursor.SetCursor(walkCursor, hotspotWalk, CursorMode.ForceSoftware);
 
-                    break;
-               
-            }
-        }
-        else
-        {
-             if(cameraRayCaster.LayerHited==GameConstants.Layers.None)
-            {
-                Vector2 hotspotUnknow = new Vector2(unknowCursor.width * 0.5f, unknowCursor.height * 0.5f);
-                Cursor.SetCursor(unknowCursor, hotspotUnknow, CursorMode.ForceSoftware);
-            }
-                 
-
-          
-        }
-		
-	}
 }

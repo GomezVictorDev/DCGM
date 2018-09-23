@@ -15,14 +15,14 @@ public class CameraRayCaster : MonoBehaviour {
     private RaycastHit hit;
     private Camera viewCam;
     private string nameLayerHited;
-    private int index=0;
+  
     
     public RaycastHit Hit
     {
         get { return hit; }
     }
    
-    public GameConstants.Layers LayerHited
+    public GameConstants.Layers CurrentLayerHited
     {
         get { return layerHited; }
     }
@@ -30,11 +30,12 @@ public class CameraRayCaster : MonoBehaviour {
     {
         get { return nameLayerHited; }
     }
-    public bool IsHited
-    {
-        get { return isHited; }
-    }
+
+  
     bool isHited = false;
+	public bool IsHited{
+		get{return isHited; }
+	}
 
 
 
@@ -42,6 +43,15 @@ public class CameraRayCaster : MonoBehaviour {
         viewCam = Camera.main;
 		
 	}
+	public delegate void OnLayerHited (GameConstants.Layers layer);
+	public delegate void OnLayerNotHited ();
+	public event  OnLayerHited onLayerHitedEvent;
+	public event  OnLayerNotHited onLayerNotHitedEvent;
+	 
+
+
+
+
 	
 	// Update is called once per frame
 	void Update () {
@@ -61,6 +71,7 @@ public class CameraRayCaster : MonoBehaviour {
         Debug.Log(nameLayerHited);
         nameLayerHited = Enum.GetName(typeof(GameConstants.Layers), GameConstants.Layers.None);
         layerHited = GameConstants.Layers.None;
+		onLayerNotHitedEvent ();
 
        
 
@@ -72,13 +83,14 @@ public class CameraRayCaster : MonoBehaviour {
     {
         int layerMask = 1 << (int)layer;
         Ray ray = viewCam.ScreenPointToRay(Input.mousePosition);
-        isHited = Physics.Raycast(ray,out hit, 1000, layerMask);
+		isHited = Physics.Raycast(ray,out hit, maxRayDistance, layerMask);
        
 
-        if (isHited)
+		if (isHited && layer!=layerHited)
         {
             layerHited = layer;
             nameLayerHited = LayerMask.LayerToName((int)layer);
+			onLayerHitedEvent (layerHited);
             
             
 

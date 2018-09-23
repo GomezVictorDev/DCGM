@@ -8,11 +8,16 @@ public class PlayerMovement : MonoBehaviour {
 
     ThirdPersonCharacter thirdPersonCharacter;
     public CameraRayCaster cameraRay;
+	private bool IsDirectMove=false;
     
     Vector3 targetPosition;
 	void Start () {
         thirdPersonCharacter = GetComponent<ThirdPersonCharacter>();
         targetPosition = transform.position;
+        
+        
+
+    
 
 
     }
@@ -20,38 +25,69 @@ public class PlayerMovement : MonoBehaviour {
     // Update is called once per frame
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            if (cameraRay.IsHited)
-            {
+        
+		if (Input.GetKey (KeyCode.G)) {
+		
+			IsDirectMove = !IsDirectMove;
+			targetPosition = transform.position;
 
+		}
 
-                switch (cameraRay.LayerHited)
-                {
-                    case GameConstants.Layers.Walkable:
-                        RaycastHit hit = cameraRay.Hit;
-                        targetPosition = hit.point;
-                        break;
-
-                    case GameConstants.Layers.Enemy:
-                        targetPosition = transform.position;
-                        break;
-
-                }
-            }
-
-
-
-        }
-
+		if (IsDirectMove) {
+			
+			FindTargetPositionOnJoystick ();
+		}
+			
+		else
+			FindTargetPositionOnClick ();
 
 
        
 
     }
-    void FixedUpdate () {
+	private void FindTargetPositionOnClick(){
+		
+		if (Input.GetMouseButtonDown(0))
+		{
+		//	if (cameraRay.IsHited)
 
-        Vector3 target = targetPosition - transform.position;
+
+
+
+				switch (cameraRay.CurrentLayerHited)
+				{
+				case GameConstants.Layers.Walkable:
+					RaycastHit hit = cameraRay.Hit;
+					targetPosition = hit.point;
+					break;
+
+				case GameConstants.Layers.Enemy:
+					targetPosition = transform.position;
+					break;
+
+				}
+			
+
+
+
+		}
+	}
+
+	private void FindTargetPositionOnJoystick(){
+		float h = Input.GetAxis ("Horizontal");
+		float v = Input.GetAxis ("Vertical");
+
+		Vector3 camFoward = Vector3.Scale (Camera.main.transform.forward, new Vector3 (1, 0, 1)).normalized;
+		targetPosition = v * camFoward + Camera.main.transform.right * h;
+		
+	}
+
+    void FixedUpdate () {
+		Vector3 target;
+		if (IsDirectMove)
+			target = targetPosition;
+		else
+			target = targetPosition - transform.position;
         
         if (target.sqrMagnitude > 0.3f)
         {
@@ -69,12 +105,9 @@ public class PlayerMovement : MonoBehaviour {
                 
         }
         
-            
 
-       
-       
-		
 	}
+
 
 
 }
