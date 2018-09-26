@@ -9,8 +9,10 @@ public class PlayerMovement : MonoBehaviour {
     ThirdPersonCharacter thirdPersonCharacter;
     public CameraRayCaster cameraRay;
 	private bool IsDirectMove=false;
-    
-    Vector3 targetPosition;
+    public float minMoveStopDistance=1;
+    public float minAttackStopDistance = 5;
+
+    Vector3 targetPosition,clickPoint;
 	void Start () {
         thirdPersonCharacter = GetComponent<ThirdPersonCharacter>();
         targetPosition = transform.position;
@@ -23,7 +25,7 @@ public class PlayerMovement : MonoBehaviour {
     }
 
     // Update is called once per frame
-    private void Update()
+    private void LateUpdate()
     {
         
 		if (Input.GetKey (KeyCode.G)) {
@@ -49,21 +51,23 @@ public class PlayerMovement : MonoBehaviour {
 		
 		if (Input.GetMouseButtonDown(0))
 		{
-		//	if (cameraRay.IsHited)
+            //	if (cameraRay.IsHited)
 
 
+            clickPoint = cameraRay.Hit.point;
 
 
-				switch (cameraRay.CurrentLayerHited)
+                switch (cameraRay.CurrentLayerHited)
 				{
+
 				case GameConstants.Layers.Walkable:
-					RaycastHit hit = cameraRay.Hit;
-					targetPosition = hit.point;
+					
+					targetPosition = ShortDestination(clickPoint, minMoveStopDistance);
 					break;
 
 				case GameConstants.Layers.Enemy:
-					targetPosition = transform.position;
-					break;
+                    targetPosition = ShortDestination(clickPoint, minAttackStopDistance);
+                    break;
 
 				}
 			
@@ -81,6 +85,27 @@ public class PlayerMovement : MonoBehaviour {
 		targetPosition = v * camFoward + Camera.main.transform.right * h;
 		
 	}
+    private Vector3 ShortDestination(Vector3 destination,float shortening)
+    {
+        /*Con este metodo podemos generar un vector unitario que aputara a la dirección de destino el cual podremos
+         multiplicar por un factor. Luego lo restaremos al vector de destino y tendremos un vector reducido por el valor de shortening*/
+        Vector3 originalDestination = destination - transform.position;
+        Vector3 reducedDestination= originalDestination.normalized * shortening;
+        Vector3 shortedDestination = destination - reducedDestination;
+
+        return shortedDestination;
+
+
+    }
+    private void OnDrawGizmos()
+    {
+        if(Gizmos.color != Color.black)
+            Gizmos.color = Color.black;
+        Gizmos.DrawLine(transform.position, targetPosition);
+        Gizmos.DrawSphere(targetPosition, 0.1f);
+        Gizmos.DrawLine(transform.position, clickPoint);
+        Gizmos.DrawSphere(clickPoint, 0.15f);
+    }
 
     void FixedUpdate () {
 		Vector3 target;
@@ -89,7 +114,7 @@ public class PlayerMovement : MonoBehaviour {
 		else
 			target = targetPosition - transform.position;
         
-        if (target.sqrMagnitude > 0.3f)
+        if (target.sqrMagnitude > 0)
         {
             thirdPersonCharacter.Move(target, false, false);
 
